@@ -7,27 +7,13 @@ export declare class MylistController {
     addItem(createDto: CreateMyListItemDto): Promise<{
         success: boolean;
         message: string;
-        data: import("mongoose").Document<unknown, {}, import("./entities/mylist.entity").MyListItem, {}, import("mongoose").DefaultSchemaOptions> & import("./entities/mylist.entity").MyListItem & {
-            _id: import("mongoose").Types.ObjectId;
-        } & {
-            __v: number;
-        };
+        data: HydratedDocument<import("./entities/mylist.entity").MyListItem>;
     }>;
     getList(queryDto: QueryMyListDto): Promise<{
         success: boolean;
-        data: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./entities/mylist.entity").MyListItem, {}, import("mongoose").DefaultSchemaOptions> & import("./entities/mylist.entity").MyListItem & {
-            _id: import("mongoose").Types.ObjectId;
-        } & {
-            __v: number;
-        }, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").Document<unknown, {}, import("./entities/mylist.entity").MyListItem, {}, import("mongoose").DefaultSchemaOptions> & import("./entities/mylist.entity").MyListItem & {
-            _id: import("mongoose").Types.ObjectId;
-        } & {
-            __v: number;
-        } & Required<{
-            _id: import("mongoose").Types.ObjectId;
-        }>)[];
+        data: any;
         pagination: {
-            nextCursor: string | null;
+            nextCursor: any;
             hasNextPage: boolean;
             limit: number;
         };

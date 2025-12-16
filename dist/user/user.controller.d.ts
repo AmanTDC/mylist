@@ -5,13 +5,9 @@ export declare class UserController {
     constructor(userService: UserService);
     getUsers(queryDto: QueryUsersDto): Promise<{
         success: boolean;
-        data: (import("mongoose").Document<unknown, {}, import("./entities/user.schema").User, {}, import("mongoose").DefaultSchemaOptions> & import("./entities/user.schema").User & {
-            _id: import("mongoose").Types.ObjectId;
-        } & {
-            __v: number;
-        })[];
+        data: any;
         pagination: {
-            nextCursor: string | null;
+            nextCursor: any;
             hasNextPage: boolean;
             limit: number;
         };

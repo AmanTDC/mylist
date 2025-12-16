@@ -1,5 +1,5 @@
-import { Model, Types } from 'mongoose';
-import { MyListItem, MyListItemDocument } from './entities/mylist.entity';
+import { Model } from 'mongoose';
+import { MyListItemDocument } from './entities/mylist.entity';
 import { CreateMyListItemDto } from './dto/create-mylist-item.dto';
 import { QueryMyListDto } from './dto/query-mylist.dto';
 export declare class MylistService {
@@ -7,19 +7,9 @@ export declare class MylistService {
     constructor(myListItemModel: Model<MyListItemDocument>);
     addItemToList(createDto: CreateMyListItemDto): Promise<MyListItemDocument>;
     getUserList(queryDto: QueryMyListDto): Promise<{
-        items: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, MyListItem, {}, import("mongoose").DefaultSchemaOptions> & MyListItem & {
-            _id: Types.ObjectId;
-        } & {
-            __v: number;
-        }, {}, import("mongoose").DefaultSchemaOptions> & import("mongoose").Document<unknown, {}, MyListItem, {}, import("mongoose").DefaultSchemaOptions> & MyListItem & {
-            _id: Types.ObjectId;
-        } & {
-            __v: number;
-        } & Required<{
-            _id: Types.ObjectId;
-        }>)[];
+        items: any;
         pagination: {
-            nextCursor: string | null;
+            nextCursor: any;
             hasNextPage: boolean;
             limit: number;
         };
