@@ -22,7 +22,7 @@ exports.ContentModule = ContentModule = __decorate([
         imports: [
             config_1.ConfigModule,
             cache_manager_1.CacheModule.register({
-                ttl: 86400,
+                ttl: 86400 * 1000,
                 max: 1000,
             }),
             mongoose_1.MongooseModule.forFeature([

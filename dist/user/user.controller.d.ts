@@ -1,4 +1,4 @@
-import { QueryUsersDto } from "src/common/dto/query-users.dto";
+import { QueryUsersDto } from "../common/dto/query-users.dto";
 import { UserService } from "./user.service";
 export declare class UserController {
     private readonly userService;

@@ -15,19 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MoviesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const movies_service_1 = require("./movies.service");
 const pagination_dto_1 = require("../common/dto/pagination.dto");
+const movies_service_1 = require("./movies.service");
 let MoviesController = class MoviesController {
     moviesService;
     constructor(moviesService) {
         this.moviesService = moviesService;
     }
-    findAll(paginationDto, genre, search, sortBy, sortOrder) {
+    findAll(paginationDto) {
         return this.moviesService.findAll({
-            genre,
-            search,
-            sortBy,
-            sortOrder,
             cursor: paginationDto.cursor,
             limit: paginationDto.limit,
         });
@@ -44,17 +40,9 @@ __decorate([
         status: 200,
         description: 'Returns paginated list of movies',
     }),
-    (0, swagger_1.ApiQuery)({ name: 'genre', required: false, enum: ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'SciFi'] }),
-    (0, swagger_1.ApiQuery)({ name: 'search', required: false, description: 'Search by title or description' }),
-    (0, swagger_1.ApiQuery)({ name: 'sortBy', required: false, description: 'Field to sort by' }),
-    (0, swagger_1.ApiQuery)({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] }),
     __param(0, (0, common_1.Query)()),
-    __param(1, (0, common_1.Query)('genre')),
-    __param(2, (0, common_1.Query)('search')),
-    __param(3, (0, common_1.Query)('sortBy')),
-    __param(4, (0, common_1.Query)('sortOrder')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [pagination_dto_1.CursorPaginationDto, String, String, String, String]),
+    __metadata("design:paramtypes", [pagination_dto_1.CursorPaginationDto]),
     __metadata("design:returntype", void 0)
 ], MoviesController.prototype, "findAll", null);
 __decorate([

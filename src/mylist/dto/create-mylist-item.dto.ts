@@ -24,6 +24,9 @@ export class CreateMyListItemDto {
         enum: ContentType,
         example: ContentType.Movie
     })
+    @IsOptional()
+    @IsEnum(ContentType)
+    contentType?: ContentType;
 
     @ApiPropertyOptional({
         description: 'Optional notes about this content',

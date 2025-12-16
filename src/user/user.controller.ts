@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { QueryUsersDto } from "src/common/dto/query-users.dto";
+import { QueryUsersDto } from "../common/dto/query-users.dto";
 import { UserService } from "./user.service";
 
 @Controller('user')

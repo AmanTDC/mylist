@@ -10,7 +10,7 @@ import { TVShow, TVShowSchema } from '../tvshows/entities/tvshow.entity';
   imports: [
     ConfigModule,
     CacheModule.register({
-      ttl: 86400, // Default 24 hours in seconds
+      ttl: 86400 * 1000, // Default 24 hours in milliseconds
       max: 1000, // Maximum number of items in cache
     }),
     MongooseModule.forFeature([

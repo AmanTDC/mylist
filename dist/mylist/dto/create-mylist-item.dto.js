@@ -16,6 +16,7 @@ const mylist_entity_1 = require("../entities/mylist.entity");
 class CreateMyListItemDto {
     userId;
     contentId;
+    contentType;
     notes;
     priority;
 }
@@ -44,6 +45,11 @@ __decorate([
         enum: mylist_entity_1.ContentType,
         example: mylist_entity_1.ContentType.Movie
     }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(mylist_entity_1.ContentType),
+    __metadata("design:type", String)
+], CreateMyListItemDto.prototype, "contentType", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Optional notes about this content',
         example: 'Must watch this weekend!'
