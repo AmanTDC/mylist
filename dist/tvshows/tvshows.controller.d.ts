@@ -5,5 +5,4 @@ export declare class TvshowsController {
     constructor(tvshowsService: TvshowsService);
     findAll(paginationDto: CursorPaginationDto): Promise<import("../common/interfaces/paginated-response.interface").CursorPaginatedResponse<import("./entities/tvshow.entity").TVShow>>;
     findOne(id: string): Promise<import("./entities/tvshow.entity").TVShow | null>;
-    remove(id: string): Promise<import("./entities/tvshow.entity").TVShow | null>;
 }

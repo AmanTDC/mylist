@@ -11,14 +11,13 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const config_1 = require("@nestjs/config");
 const app_controller_1 = require("./app.controller");
-const app_service_1 = require("./app.service");
 const movies_module_1 = require("./movies/movies.module");
-const content_module_1 = require("./content/content.module");
 const tvshows_module_1 = require("./tvshows/tvshows.module");
 const common_module_1 = require("./common/common.module");
 const mylist_module_1 = require("./mylist/mylist.module");
 const user_module_1 = require("./user/user.module");
 const mylist_entity_1 = require("./mylist/entities/mylist.entity");
+const content_module_1 = require("./content/content.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -38,13 +37,12 @@ exports.AppModule = AppModule = __decorate([
             ]),
             movies_module_1.MoviesModule,
             tvshows_module_1.TvshowsModule,
-            content_module_1.ContentModule,
             common_module_1.CommonModule,
             mylist_module_1.MylistModule,
             user_module_1.UserModule,
+            content_module_1.ContentModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [app_service_1.AppService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

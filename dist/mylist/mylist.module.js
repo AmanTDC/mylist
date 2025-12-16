@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mylist_service_1 = require("./mylist.service");
 const mylist_controller_1 = require("./mylist.controller");
 const mylist_entity_1 = require("./entities/mylist.entity");
+const content_module_1 = require("../content/content.module");
 let MylistModule = class MylistModule {
 };
 exports.MylistModule = MylistModule;
@@ -21,10 +22,10 @@ exports.MylistModule = MylistModule = __decorate([
             mongoose_1.MongooseModule.forFeature([
                 { name: mylist_entity_1.MyListItem.name, schema: mylist_entity_1.MyListItemSchema },
             ]),
+            content_module_1.ContentModule,
         ],
         controllers: [mylist_controller_1.MylistController],
         providers: [mylist_service_1.MylistService],
-        exports: [mylist_service_1.MylistService],
     })
 ], MylistModule);
 //# sourceMappingURL=mylist.module.js.map

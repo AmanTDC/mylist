@@ -16,16 +16,11 @@ exports.MoviesController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const movies_service_1 = require("./movies.service");
-const create_movie_dto_1 = require("./dto/create-movie.dto");
-const update_movie_dto_1 = require("./dto/update-movie.dto");
 const pagination_dto_1 = require("../common/dto/pagination.dto");
 let MoviesController = class MoviesController {
     moviesService;
     constructor(moviesService) {
         this.moviesService = moviesService;
-    }
-    create(createMovieDto) {
-        return this.moviesService.create(createMovieDto);
     }
     findAll(paginationDto, genre, search, sortBy, sortOrder) {
         return this.moviesService.findAll({
@@ -40,24 +35,8 @@ let MoviesController = class MoviesController {
     findOne(id) {
         return this.moviesService.findOne(id);
     }
-    update(id, updateMovieDto) {
-        return this.moviesService.update(id, updateMovieDto);
-    }
-    remove(id) {
-        return this.moviesService.remove(id);
-    }
 };
 exports.MoviesController = MoviesController;
-__decorate([
-    (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new movie' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Movie created successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input' }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_movie_dto_1.CreateMovieDto]),
-    __metadata("design:returntype", void 0)
-], MoviesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all movies with cursor pagination' }),
@@ -89,29 +68,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MoviesController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Patch)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Update a movie' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'Movie ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Movie updated successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Movie not found' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_movie_dto_1.UpdateMovieDto]),
-    __metadata("design:returntype", void 0)
-], MoviesController.prototype, "update", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Delete a movie' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'Movie ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Movie deleted successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Movie not found' }),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], MoviesController.prototype, "remove", null);
 exports.MoviesController = MoviesController = __decorate([
     (0, swagger_1.ApiTags)('movies'),
     (0, common_1.Controller)('movies'),

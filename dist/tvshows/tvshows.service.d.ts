@@ -13,5 +13,4 @@ export declare class TvshowsService {
         limit?: number;
     }): Promise<CursorPaginatedResponse<TVShow>>;
     findOne(id: string): Promise<TVShow | null>;
-    remove(id: string): Promise<TVShow | null>;
 }

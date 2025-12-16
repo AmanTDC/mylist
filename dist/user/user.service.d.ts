@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from './entities/user.schema';
 export declare class UserService {
     private userModel;
@@ -8,9 +8,13 @@ export declare class UserService {
         limit?: number;
         sortOrder?: 'asc' | 'desc';
     }): Promise<{
-        users: any;
+        users: (import("mongoose").Document<unknown, {}, User, {}, import("mongoose").DefaultSchemaOptions> & User & {
+            _id: Types.ObjectId;
+        } & {
+            __v: number;
+        })[];
         pagination: {
-            nextCursor: any;
+            nextCursor: string | null;
             hasNextPage: boolean;
             limit: number;
         };

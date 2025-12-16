@@ -11,33 +11,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MylistService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const mylist_entity_1 = require("./entities/mylist.entity");
+const content_service_1 = require("../content/content.service");
 let MylistService = class MylistService {
     myListItemModel;
-    constructor(myListItemModel) {
+    contentService;
+    constructor(myListItemModel, contentService) {
         this.myListItemModel = myListItemModel;
+        this.contentService = contentService;
     }
     async addItemToList(createDto) {
         try {
+            const contentDetails = await this.contentService.getContentById(createDto.contentId);
+            const contentType = contentDetails.contentType;
             const item = await this.myListItemModel.create({
                 userId: new mongoose_2.Types.ObjectId(createDto.userId),
                 contentId: new mongoose_2.Types.ObjectId(createDto.contentId),
-                contentType: createDto.contentType,
+                contentType: contentType,
                 notes: createDto.notes,
                 priority: createDto.priority,
                 addedAt: new Date(),
             });
-            return item;
+            return {
+                ...item.toObject(),
+                title: contentDetails.title,
+                description: contentDetails.description,
+                genres: contentDetails.genres,
+            };
         }
         catch (error) {
             if (error.code === 11000) {
                 throw new common_1.ConflictException('This item is already in your list');
+            }
+            if (error instanceof common_1.NotFoundException) {
+                throw error;
             }
             throw error;
         }
@@ -70,11 +82,30 @@ let MylistService = class MylistService {
             .exec();
         const hasNextPage = items.length > limit;
         const resultItems = hasNextPage ? items.slice(0, limit) : items;
+        const itemsWithContent = await Promise.all(resultItems.map(async (item) => {
+            try {
+                const content = await this.contentService.getContentById(item.contentId.toString());
+                return {
+                    ...item.toObject(),
+                    title: content.title,
+                    description: content.description,
+                    genres: content.genres,
+                };
+            }
+            catch (error) {
+                return {
+                    ...item.toObject(),
+                    title: null,
+                    description: null,
+                    genres: [],
+                };
+            }
+        }));
         const nextCursor = hasNextPage && resultItems.length > 0
             ? resultItems[resultItems.length - 1]._id.toString()
             : null;
         return {
-            items: resultItems,
+            items: itemsWithContent,
             pagination: {
                 nextCursor,
                 hasNextPage,
@@ -94,18 +125,12 @@ let MylistService = class MylistService {
             throw new common_1.NotFoundException('Item not found in your list or you do not have permission to delete it');
         }
     }
-    async isItemInList(userId, contentId) {
-        const item = await this.myListItemModel.findOne({
-            userId: new mongoose_2.Types.ObjectId(userId),
-            contentId: new mongoose_2.Types.ObjectId(contentId),
-        });
-        return !!item;
-    }
 };
 exports.MylistService = MylistService;
 exports.MylistService = MylistService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(mylist_entity_1.MyListItem.name)),
-    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        content_service_1.ContentService])
 ], MylistService);
 //# sourceMappingURL=mylist.service.js.map

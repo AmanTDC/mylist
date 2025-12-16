@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateMovieDto } from './dto/create-movie.dto';
-import { UpdateMovieDto } from './dto/update-movie.dto';
 import { Movie } from './entities/movie.entity';
 import { CursorPaginationHelper } from '../common/utils/pagination.helper';
 import { CursorPaginatedResponse } from '../common/interfaces/paginated-response.interface';
@@ -13,10 +11,7 @@ export class MoviesService {
     @InjectModel(Movie.name) private movieModel: Model<Movie>,
   ) { }
 
-  async create(createMovieDto: CreateMovieDto): Promise<Movie> {
-    const movie = new this.movieModel(createMovieDto);
-    return movie.save();
-  }
+
 
   async findAll(filters?: {
     genre?: string;
@@ -72,16 +67,5 @@ export class MoviesService {
     return this.movieModel.findById(id).exec();
   }
 
-  async update(
-    id: string,
-    updateMovieDto: UpdateMovieDto,
-  ): Promise<Movie | null> {
-    return this.movieModel
-      .findByIdAndUpdate(id, updateMovieDto, { new: true })
-      .exec();
-  }
 
-  async remove(id: string): Promise<Movie | null> {
-    return this.movieModel.findByIdAndDelete(id).exec();
-  }
 }

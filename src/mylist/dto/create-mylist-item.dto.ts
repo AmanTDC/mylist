@@ -19,14 +19,11 @@ export class CreateMyListItemDto {
     @IsMongoId()
     contentId: string;
 
-    @ApiProperty({
-        description: 'Type of content',
+    @ApiPropertyOptional({
+        description: 'Type of content (optional - will be auto-detected if not provided)',
         enum: ContentType,
         example: ContentType.Movie
     })
-    @IsNotEmpty()
-    @IsEnum(ContentType)
-    contentType: ContentType;
 
     @ApiPropertyOptional({
         description: 'Optional notes about this content',

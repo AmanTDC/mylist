@@ -1,98 +1,119 @@
-import { Injectable } from '@nestjs/common';
-import { MoviesService } from '../movies/movies.service';
-import { TvshowsService } from '../tvshows/tvshows.service';
-import { CursorPaginatedResponse } from '../common/interfaces/paginated-response.interface';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import { Movie, MovieDocument } from '../movies/entities/movie.entity';
+import { TVShow, TVShowDocument } from '../tvshows/entities/tvshow.entity';
+import { ContentType } from '../mylist/entities/mylist.entity';
+import { ConfigService } from '@nestjs/config';
+
+export interface ContentDetails {
+  id: string;
+  contentType: ContentType;
+  title: string;
+  description: string;
+  genres: string[];
+  [key: string]: any; // For additional fields like releaseDate, director, etc.
+}
 
 @Injectable()
 export class ContentService {
+  private readonly cacheTTL: number;
+
   constructor(
-    private readonly moviesService: MoviesService,
-    private readonly tvshowsService: TvshowsService,
-  ) { }
+    @InjectModel(Movie.name) private movieModel: Model<MovieDocument>,
+    @InjectModel(TVShow.name) private tvShowModel: Model<TVShowDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private configService: ConfigService,
+  ) {
+    // Get cache TTL from environment or default to 24 hours (86400 seconds)
+    this.cacheTTL = this.configService.get<number>('CONTENT_CACHE_TTL', 86400);
+  }
 
   /**
-   * Get all content (movies + TV shows combined) with cursor pagination
+   * Get content by ID with automatic type detection and caching
+   * Checks cache first, then searches both Movies and TVShows collections
    */
-  async findAll(filters?: {
-    type?: 'movie' | 'tvshow';
-    genre?: string;
-    search?: string;
-    cursor?: string;
-    limit?: number;
-  }): Promise<CursorPaginatedResponse<any>> {
-    const limit = filters?.limit || 20;
-
-    // If type is specified, delegate to the appropriate service
-    if (filters?.type === 'movie') {
-      return this.moviesService.findAll({
-        genre: filters?.genre,
-        search: filters?.search,
-        cursor: filters?.cursor,
-        limit,
-      });
+  async getContentById(contentId: string): Promise<ContentDetails> {
+    if (!Types.ObjectId.isValid(contentId)) {
+      throw new NotFoundException(`Invalid content ID: ${contentId}`);
     }
 
-    if (filters?.type === 'tvshow') {
-      return this.tvshowsService.findAll({
-        genre: filters?.genre,
-        search: filters?.search,
-        cursor: filters?.cursor,
-        limit,
-      });
+    // Check cache first
+    const cacheKey = `content:${contentId}`;
+    const cached = await this.cacheManager.get<ContentDetails>(cacheKey);
+
+    if (cached) {
+      return cached;
     }
 
-    // Combined results (movies + tvshows)
-    // Note: For combined results, cursor pagination becomes complex
-    // This is a simplified version - for production, consider separating endpoints
-    const movieResults = await this.moviesService.findAll({
-      genre: filters?.genre,
-      search: filters?.search,
-      limit: Math.ceil(limit / 2),
-    });
+    // Not in cache, search in database
+    // Try to find in Movies first
+    const movie = await this.movieModel.findById(contentId).exec();
+    if (movie) {
+      const contentDetails = this.mapMovieToContentDetails(movie);
+      await this.cacheManager.set(cacheKey, contentDetails, this.cacheTTL * 1000); // Convert to ms
+      return contentDetails;
+    }
 
-    const tvShowResults = await this.tvshowsService.findAll({
-      genre: filters?.genre,
-      search: filters?.search,
-      limit: Math.ceil(limit / 2),
-    });
+    // If not found in Movies, try TVShows
+    const tvShow = await this.tvShowModel.findById(contentId).exec();
+    if (tvShow) {
+      const contentDetails = this.mapTVShowToContentDetails(tvShow);
+      await this.cacheManager.set(cacheKey, contentDetails, this.cacheTTL * 1000); // Convert to ms
+      return contentDetails;
+    }
 
-    const combinedData = [
-      ...movieResults.data.map((movie) => ({
-        ...JSON.parse(JSON.stringify(movie)),
-        contentType: 'Movie',
-      })),
-      ...tvShowResults.data.map((tvshow) => ({
-        ...JSON.parse(JSON.stringify(tvshow)),
-        contentType: 'TVShow',
-      })),
-    ];
+    // Content not found in either collection
+    throw new NotFoundException(`Content with ID ${contentId} not found`);
+  }
 
+  /**
+   * Get multiple contents by IDs (batch operation)
+   * Useful for populating user's list
+   */
+  async getContentsByIds(contentIds: string[]): Promise<ContentDetails[]> {
+    const promises = contentIds.map(id => this.getContentById(id));
+    return Promise.all(promises);
+  }
+
+  /**
+   * Manually invalidate cache for a specific content ID
+   * Useful if content is updated (though rare for movies/shows)
+   */
+  async invalidateContentCache(contentId: string): Promise<void> {
+    const cacheKey = `content:${contentId}`;
+    await this.cacheManager.del(cacheKey);
+  }
+
+  /**
+   * Map Movie entity to ContentDetails
+   */
+  private mapMovieToContentDetails(movie: MovieDocument): ContentDetails {
     return {
-      data: combinedData,
-      pagination: {
-        nextCursor: null, // Combined pagination is complex
-        prevCursor: null,
-        hasNext: movieResults.pagination.hasNext || tvShowResults.pagination.hasNext,
-        hasPrev: false,
-        limit,
-      },
+      id: movie._id.toString(),
+      contentType: ContentType.Movie,
+      title: movie.title,
+      description: movie.description,
+      genres: movie.genres,
+      releaseDate: movie.releaseDate,
+      director: movie.director,
+      actors: movie.actors,
     };
   }
 
   /**
-   * Get a single piece of content by ID and type
+   * Map TVShow entity to ContentDetails
    */
-  async findOne(id: string, type: 'movie' | 'tvshow'): Promise<any> {
-    if (type === 'movie') {
-      const movie = await this.moviesService.findOne(id);
-      return movie
-        ? { ...JSON.parse(JSON.stringify(movie)), contentType: 'Movie' }
-        : null;
-    } else {
-      const tvshow = await this.tvshowsService.findOne(id);
-      return tvshow
-        ? { ...JSON.parse(JSON.stringify(tvshow)), contentType: 'TVShow' }
-        : null;
-    }
+  private mapTVShowToContentDetails(tvShow: TVShowDocument): ContentDetails {
+    return {
+      id: tvShow._id.toString(),
+      contentType: ContentType.TVShow,
+      title: tvShow.title,
+      description: tvShow.description,
+      genres: tvShow.genres,
+      episodes: tvShow.episodes,
+    };
   }
 }

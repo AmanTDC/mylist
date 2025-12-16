@@ -1,33 +1,38 @@
 # API Routes - Content Modules
 
+> [!IMPORTANT]
+> **Read-Only Access**: Movies and TV shows endpoints are now **READ-ONLY**. Create, update, and delete operations have been removed.
+
 ## 📍 Available Routes
 
-### **Movies Module** - `/movies`
+### **Movies Module** - `/movies` (Read-Only)
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
 | `GET` | `/movies` | Get all movies | `?genre=Action`, `?search=inception`, `?sortBy=releaseDate`, `?sortOrder=asc\|desc` |
 | `GET` | `/movies/:id` | Get single movie | - |
-| `POST` | `/movies` | Create movie | - |
-| `PATCH` | `/movies/:id` | Update movie | - |
-| `DELETE` | `/movies/:id` | Delete movie | - |
 
-### **TVShows Module** - `/tvshows`
+### **TVShows Module** - `/tvshows` (Read-Only)
 
 | Method | Endpoint | Description | Query Params |
 |--------|----------|-------------|--------------|
 | `GET` | `/tvshows` | Get all TV shows | `?genre=Drama`, `?search=breaking`, `?sortBy=createdAt`, `?sortOrder=asc\|desc` |
 | `GET` | `/tvshows/:id` | Get single TV show | - |
-| `POST` | `/tvshows` | Create TV show | - |
-| `PATCH` | `/tvshows/:id` | Update TV show | - |
-| `DELETE` | `/tvshows/:id` | Delete TV show | - |
 
-### **Content Module** - `/content`
+### **MyList Module** - `/mylist`
 
-| Method | Endpoint | Description | Query Params |
-|--------|----------|-------------|--------------|
-| `GET` | `/content` | Get all content (movies + tvshows) | `?type=movie\|tvshow`, `?genre=Action`, `?search=...` |
-| `GET` | `/content/:type/:id` | Get single content by type | type: `movie` or `tvshow` |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/mylist` | Get user's list with cursor pagination |
+| `POST` | `/mylist` | Add item to user's list |
+| `DELETE` | `/mylist/:itemId` | Remove item from user's list |
+
+### **User Module** - `/users`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/users` | Get all users with cursor pagination |
+| `GET` | `/users/:id` | Get single user |
 
 ---
 
@@ -48,30 +53,27 @@ GET http://localhost:3000/tvshows?genre=Drama
 GET http://localhost:3000/tvshows?search=breaking
 ```
 
-### Get Combined Content
-```bash
-# All content (movies + TV shows)
-GET http://localhost:3000/content
-
-# Only movies
-GET http://localhost:3000/content?type=movie
-
-# Only TV shows
-GET http://localhost:3000/content?type=tvshow
-
-# Filter by genre
-GET http://localhost:3000/content?genre=Action
-
-# Search across all content
-GET http://localhost:3000/content?search=dark
-```
-
 ### Get Single Content
 ```bash
 GET http://localhost:3000/movies/507f1f77bcf86cd799439011
 GET http://localhost:3000/tvshows/507f1f77bcf86cd799439012
-GET http://localhost:3000/content/movie/507f1f77bcf86cd799439011
-GET http://localhost:3000/content/tvshow/507f1f77bcf86cd799439012
+```
+
+### MyList Operations
+```bash
+# Get user's list
+GET http://localhost:3000/mylist?userId=user123
+
+# Add item to list
+POST http://localhost:3000/mylist
+{
+  "userId": "user123",
+  "contentId": "507f1f77bcf86cd799439011",
+  "contentType": "Movie"
+}
+
+# Remove item from list
+DELETE http://localhost:3000/mylist/507f1f77bcf86cd799439999
 ```
 
 ---
@@ -95,30 +97,6 @@ GET http://localhost:3000/content/tvshow/507f1f77bcf86cd799439012
 ]
 ```
 
-### Content Response (Combined)
-```json
-[
-  {
-    "_id": "507f1f77bcf86cd799439011",
-    "title": "Inception",
-    "description": "...",
-    "genres": ["SciFi", "Action"],
-    "releaseDate": "2010-07-16T00:00:00.000Z",
-    "director": "Christopher Nolan",
-    "actors": [...],
-    "contentType": "Movie"
-  },
-  {
-    "_id": "507f1f77bcf86cd799439012",
-    "title": "Breaking Bad",
-    "description": "...",
-    "genres": ["Drama"],
-    "episodes": [...],
-    "contentType": "TVShow"
-  }
-]
-```
-
 ---
 
 ## 🚀 Start the Server
@@ -137,8 +115,8 @@ Server runs on `http://localhost:3000`
 src/
 ├── movies/
 │   ├── movies.module.ts
-│   ├── movies.controller.ts      # Handles /movies routes
-│   ├── movies.service.ts          # CRUD + filtering logic
+│   ├── movies.controller.ts      # Handles /movies routes (READ-ONLY)
+│   ├── movies.service.ts          # Read operations only
 │   ├── dto/
 │   │   ├── create-movie.dto.ts
 │   │   └── update-movie.dto.ts
@@ -147,52 +125,48 @@ src/
 │
 ├── tvshows/
 │   ├── tvshows.module.ts
-│   ├── tvshows.controller.ts     # Handles /tvshows routes
-│   ├── tvshows.service.ts         # CRUD + filtering logic
-│   ├── dto/
-│   │   ├── create-tvshow.dto.ts
-│   │   └── update-tvshow.dto.ts
+│   ├── tvshows.controller.ts     # Handles /tvshows routes (READ-ONLY)
+│   ├── tvshows.service.ts         # Read operations only
 │   └── entities/
 │       └── tvshow.entity.ts       # Mongoose schema
 │
-└── content/
-    ├── content.module.ts
-    ├── content.controller.ts      # Handles /content routes
-    ├── content.service.ts          # Combines movies + tvshows
-    └── dto/...
+├── mylist/
+│   ├── mylist.module.ts
+│   ├── mylist.controller.ts       # Handles /mylist routes
+│   ├── mylist.service.ts          # Full CRUD operations
+│   └── ...
+│
+└── user/
+    ├── user.module.ts
+    ├── user.controller.ts         # Handles /users routes
+    └── ...
 ```
 
 ---
 
 ## ✨ Features Implemented
 
-- ✅ Modular architecture (Movies, TVShows, Content)
-- ✅ Full CRUD operations for movies and TV shows
+- ✅ Modular architecture (Movies, TVShows, MyList, User)
+- ✅ Read-only access for movies and TV shows
+- ✅ Full CRUD operations for MyList
 - ✅ Genre filtering (`?genre=Action`)
 - ✅ Text search (`?search=inception`)
 - ✅ Sorting (`?sortBy=releaseDate&sortOrder=desc`)
-- ✅ Combined content endpoint (`/content`)
-- ✅ Type-based filtering (`?type=movie|tvshow`)
+- ✅ Cursor-based pagination
 - ✅ DTOs with validation (class-validator)
 - ✅ Mongoose schemas in respective modules
 - ✅ Clean separation of concerns
 
 ---
 
-## 🔜 Recommended Next Steps (MyList Module)
+## 🔒 Removed Operations
 
-For your MyList requirements, you should create:
+The following operations have been removed:
+- ❌ `POST /movies` - Create movie
+- ❌ `PATCH /movies/:id` - Update movie
+- ❌ `DELETE /movies/:id` - Delete movie
+- ❌ `POST /tvshows` - Create TV show
+- ❌ `PATCH /tvshows/:id` - Update TV show
+- ❌ `DELETE /tvshows/:id` - Delete TV show
+- ❌ `/content/*` - All content endpoints (module removed)
 
-```bash
-npx nest g resource mylist --no-spec
-```
-
-Then implement:
-- `GET /mylist` - Get user's list with query params
-- `POST /mylist/bulk` - Add multiple items (multi-select)
-- `DELETE /mylist/bulk` - Remove multiple items (multi-select)
-- `POST /mylist` - Add single item
-- `DELETE /mylist/:itemId` - Remove single item
-- `PATCH /mylist/:itemId` - Update notes/priority
-
-Would you like me to create the MyList module next?

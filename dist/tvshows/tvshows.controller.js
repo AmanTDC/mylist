@@ -31,9 +31,6 @@ let TvshowsController = class TvshowsController {
     findOne(id) {
         return this.tvshowsService.findOne(id);
     }
-    remove(id) {
-        return this.tvshowsService.remove(id);
-    }
 };
 exports.TvshowsController = TvshowsController;
 __decorate([
@@ -56,15 +53,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TvshowsController.prototype, "findOne", null);
-__decorate([
-    (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'TV show deleted successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'TV show not found' }),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], TvshowsController.prototype, "remove", null);
 exports.TvshowsController = TvshowsController = __decorate([
     (0, swagger_1.ApiTags)('tvshows'),
     (0, common_1.Controller)('tvshows'),

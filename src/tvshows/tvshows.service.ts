@@ -65,7 +65,5 @@ export class TvshowsService {
     return this.tvShowModel.findById(id).exec();
   }
 
-  async remove(id: string): Promise<TVShow | null> {
-    return this.tvShowModel.findByIdAndDelete(id).exec();
-  }
+
 }

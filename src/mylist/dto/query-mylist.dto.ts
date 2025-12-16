@@ -40,7 +40,6 @@ export class QueryMyListDto {
 
     @ApiPropertyOptional({
         description: 'Cursor for pagination (ID of the last item from previous page)',
-        example: '507f1f77bcf86cd799439013'
     })
     @IsOptional()
     @IsMongoId()

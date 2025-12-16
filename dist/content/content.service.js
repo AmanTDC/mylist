@@ -8,86 +8,93 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ContentService = void 0;
 const common_1 = require("@nestjs/common");
-const movies_service_1 = require("../movies/movies.service");
-const tvshows_service_1 = require("../tvshows/tvshows.service");
+const mongoose_1 = require("@nestjs/mongoose");
+const mongoose_2 = require("mongoose");
+const cache_manager_1 = require("@nestjs/cache-manager");
+const movie_entity_1 = require("../movies/entities/movie.entity");
+const tvshow_entity_1 = require("../tvshows/entities/tvshow.entity");
+const mylist_entity_1 = require("../mylist/entities/mylist.entity");
+const config_1 = require("@nestjs/config");
 let ContentService = class ContentService {
-    moviesService;
-    tvshowsService;
-    constructor(moviesService, tvshowsService) {
-        this.moviesService = moviesService;
-        this.tvshowsService = tvshowsService;
+    movieModel;
+    tvShowModel;
+    cacheManager;
+    configService;
+    cacheTTL;
+    constructor(movieModel, tvShowModel, cacheManager, configService) {
+        this.movieModel = movieModel;
+        this.tvShowModel = tvShowModel;
+        this.cacheManager = cacheManager;
+        this.configService = configService;
+        this.cacheTTL = this.configService.get('CONTENT_CACHE_TTL', 86400);
     }
-    async findAll(filters) {
-        const limit = filters?.limit || 20;
-        if (filters?.type === 'movie') {
-            return this.moviesService.findAll({
-                genre: filters?.genre,
-                search: filters?.search,
-                cursor: filters?.cursor,
-                limit,
-            });
+    async getContentById(contentId) {
+        if (!mongoose_2.Types.ObjectId.isValid(contentId)) {
+            throw new common_1.NotFoundException(`Invalid content ID: ${contentId}`);
         }
-        if (filters?.type === 'tvshow') {
-            return this.tvshowsService.findAll({
-                genre: filters?.genre,
-                search: filters?.search,
-                cursor: filters?.cursor,
-                limit,
-            });
+        const cacheKey = `content:${contentId}`;
+        const cached = await this.cacheManager.get(cacheKey);
+        if (cached) {
+            return cached;
         }
-        const movieResults = await this.moviesService.findAll({
-            genre: filters?.genre,
-            search: filters?.search,
-            limit: Math.ceil(limit / 2),
-        });
-        const tvShowResults = await this.tvshowsService.findAll({
-            genre: filters?.genre,
-            search: filters?.search,
-            limit: Math.ceil(limit / 2),
-        });
-        const combinedData = [
-            ...movieResults.data.map((movie) => ({
-                ...JSON.parse(JSON.stringify(movie)),
-                contentType: 'Movie',
-            })),
-            ...tvShowResults.data.map((tvshow) => ({
-                ...JSON.parse(JSON.stringify(tvshow)),
-                contentType: 'TVShow',
-            })),
-        ];
+        const movie = await this.movieModel.findById(contentId).exec();
+        if (movie) {
+            const contentDetails = this.mapMovieToContentDetails(movie);
+            await this.cacheManager.set(cacheKey, contentDetails, this.cacheTTL * 1000);
+            return contentDetails;
+        }
+        const tvShow = await this.tvShowModel.findById(contentId).exec();
+        if (tvShow) {
+            const contentDetails = this.mapTVShowToContentDetails(tvShow);
+            await this.cacheManager.set(cacheKey, contentDetails, this.cacheTTL * 1000);
+            return contentDetails;
+        }
+        throw new common_1.NotFoundException(`Content with ID ${contentId} not found`);
+    }
+    async getContentsByIds(contentIds) {
+        const promises = contentIds.map(id => this.getContentById(id));
+        return Promise.all(promises);
+    }
+    async invalidateContentCache(contentId) {
+        const cacheKey = `content:${contentId}`;
+        await this.cacheManager.del(cacheKey);
+    }
+    mapMovieToContentDetails(movie) {
         return {
-            data: combinedData,
-            pagination: {
-                nextCursor: null,
-                prevCursor: null,
-                hasNext: movieResults.pagination.hasNext || tvShowResults.pagination.hasNext,
-                hasPrev: false,
-                limit,
-            },
+            id: movie._id.toString(),
+            contentType: mylist_entity_1.ContentType.Movie,
+            title: movie.title,
+            description: movie.description,
+            genres: movie.genres,
+            releaseDate: movie.releaseDate,
+            director: movie.director,
+            actors: movie.actors,
         };
     }
-    async findOne(id, type) {
-        if (type === 'movie') {
-            const movie = await this.moviesService.findOne(id);
-            return movie
-                ? { ...JSON.parse(JSON.stringify(movie)), contentType: 'Movie' }
-                : null;
-        }
-        else {
-            const tvshow = await this.tvshowsService.findOne(id);
-            return tvshow
-                ? { ...JSON.parse(JSON.stringify(tvshow)), contentType: 'TVShow' }
-                : null;
-        }
+    mapTVShowToContentDetails(tvShow) {
+        return {
+            id: tvShow._id.toString(),
+            contentType: mylist_entity_1.ContentType.TVShow,
+            title: tvShow.title,
+            description: tvShow.description,
+            genres: tvShow.genres,
+            episodes: tvShow.episodes,
+        };
     }
 };
 exports.ContentService = ContentService;
 exports.ContentService = ContentService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [movies_service_1.MoviesService,
-        tvshows_service_1.TvshowsService])
+    __param(0, (0, mongoose_1.InjectModel)(movie_entity_1.Movie.name)),
+    __param(1, (0, mongoose_1.InjectModel)(tvshow_entity_1.TVShow.name)),
+    __param(2, (0, common_1.Inject)(cache_manager_1.CACHE_MANAGER)),
+    __metadata("design:paramtypes", [mongoose_2.Model,
+        mongoose_2.Model, Object, config_1.ConfigService])
 ], ContentService);
 //# sourceMappingURL=content.service.js.map

@@ -64,7 +64,6 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Cursor for pagination (ID of the last item from previous page)',
-        example: '507f1f77bcf86cd799439013'
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsMongoId)(),

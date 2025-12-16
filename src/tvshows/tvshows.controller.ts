@@ -1,11 +1,7 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
-  Delete,
   Query,
 } from '@nestjs/common';
 import {
@@ -42,10 +38,5 @@ export class TvshowsController {
     return this.tvshowsService.findOne(id);
   }
 
-  @Delete(':id')
-  @ApiResponse({ status: 200, description: 'TV show deleted successfully' })
-  @ApiResponse({ status: 404, description: 'TV show not found' })
-  remove(@Param('id') id: string) {
-    return this.tvshowsService.remove(id);
-  }
+
 }
