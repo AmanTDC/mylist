@@ -1,0 +1,120 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.MoviesController = void 0;
+const common_1 = require("@nestjs/common");
+const swagger_1 = require("@nestjs/swagger");
+const movies_service_1 = require("./movies.service");
+const create_movie_dto_1 = require("./dto/create-movie.dto");
+const update_movie_dto_1 = require("./dto/update-movie.dto");
+const pagination_dto_1 = require("../common/dto/pagination.dto");
+let MoviesController = class MoviesController {
+    moviesService;
+    constructor(moviesService) {
+        this.moviesService = moviesService;
+    }
+    create(createMovieDto) {
+        return this.moviesService.create(createMovieDto);
+    }
+    findAll(paginationDto, genre, search, sortBy, sortOrder) {
+        return this.moviesService.findAll({
+            genre,
+            search,
+            sortBy,
+            sortOrder,
+            cursor: paginationDto.cursor,
+            limit: paginationDto.limit,
+        });
+    }
+    findOne(id) {
+        return this.moviesService.findOne(id);
+    }
+    update(id, updateMovieDto) {
+        return this.moviesService.update(id, updateMovieDto);
+    }
+    remove(id) {
+        return this.moviesService.remove(id);
+    }
+};
+exports.MoviesController = MoviesController;
+__decorate([
+    (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new movie' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Movie created successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_movie_dto_1.CreateMovieDto]),
+    __metadata("design:returntype", void 0)
+], MoviesController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all movies with cursor pagination' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Returns paginated list of movies',
+    }),
+    (0, swagger_1.ApiQuery)({ name: 'genre', required: false, enum: ['Action', 'Comedy', 'Drama', 'Fantasy', 'Horror', 'Romance', 'SciFi'] }),
+    (0, swagger_1.ApiQuery)({ name: 'search', required: false, description: 'Search by title or description' }),
+    (0, swagger_1.ApiQuery)({ name: 'sortBy', required: false, description: 'Field to sort by' }),
+    (0, swagger_1.ApiQuery)({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] }),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Query)('genre')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('sortBy')),
+    __param(4, (0, common_1.Query)('sortOrder')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [pagination_dto_1.CursorPaginationDto, String, String, String, String]),
+    __metadata("design:returntype", void 0)
+], MoviesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get a movie by ID' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Movie ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Returns the movie' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Movie not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MoviesController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Patch)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Update a movie' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Movie ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Movie updated successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Movie not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, update_movie_dto_1.UpdateMovieDto]),
+    __metadata("design:returntype", void 0)
+], MoviesController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a movie' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Movie ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Movie deleted successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Movie not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MoviesController.prototype, "remove", null);
+exports.MoviesController = MoviesController = __decorate([
+    (0, swagger_1.ApiTags)('movies'),
+    (0, common_1.Controller)('movies'),
+    __metadata("design:paramtypes", [movies_service_1.MoviesService])
+], MoviesController);
+//# sourceMappingURL=movies.controller.js.map
